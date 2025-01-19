@@ -1,2 +1,14 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
+torch
+torchvision
+ftfy
+regex
+tqdm
+pillow
+sqlalchemy
+psycopg2-binary
+alembic
+python-multipart
+git+https://github.com/openai/CLIP.git
+numpy
