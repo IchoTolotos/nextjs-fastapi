@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os
 from pathlib import Path
@@ -10,15 +11,24 @@ from typing import List
 from . import models
 from .database import engine, get_db
 from .clip_service import clip_service
+from . import config
+import logging
 
 app = FastAPI()
 
-# Create uploads directory if it doesn't exist
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount the uploads directory
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory=str(config.UPLOAD_DIR)), name="uploads")
+
+logger = logging.getLogger(__name__)
 
 @app.post("/api/images/upload")
 async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -29,7 +39,7 @@ async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_d
     # Generate unique filename for storage
     file_extension = Path(file.filename).suffix
     storage_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = UPLOAD_DIR / storage_filename
+    file_path = config.UPLOAD_DIR / storage_filename
     
     with file_path.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -59,7 +69,10 @@ async def upload_image(file: UploadFile = File(...), db: Session = Depends(get_d
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/images/search")
-async def search_images(query: str, db: Session = Depends(get_db)):
+async def search_images(
+    query: str, 
+    db: Session = Depends(get_db)
+):
     """Search images using text query."""
     try:
         # Generate text embedding
@@ -67,21 +80,30 @@ async def search_images(query: str, db: Session = Depends(get_db)):
         
         # Get all images
         images = db.query(models.Image).all()
+        logger.info(f"Found {len(images)} images to search through")
         
-        # Calculate similarities
-        results = []
+        # Calculate similarities for all images
+        all_results = []
         for image in images:
-            similarity = clip_service.compare_embeddings(text_embedding, image.embedding)
-            results.append({
-                "id": str(image.id),
-                "filename": image.storage_filename,  # Use storage filename
-                "similarity": similarity
-            })
+            try:
+                similarity = clip_service.compare_embeddings(text_embedding, image.embedding)
+                all_results.append({
+                    "id": str(image.id),
+                    "filename": image.storage_filename,
+                    "similarity": similarity
+                })
+            except Exception as e:
+                logger.error(f"Error processing image {image.id}: {str(e)}")
+                continue
         
-        # Sort by similarity
-        results.sort(key=lambda x: x["similarity"], reverse=True)
-        return results
+        # Sort all results by similarity
+        all_results.sort(key=lambda x: x["similarity"], reverse=True)
+        
+        return all_results
+            
     except Exception as e:
+        logger.error(f"Search error: {str(e)}")
+        logger.exception("Full traceback:")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/images/{image_id}")

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ImageUpload from './components/ImageUpload';
 import SearchBar from './components/SearchBar';
 import ImageGrid from './components/ImageGrid';
+import { Loader2 } from 'lucide-react';
 
 interface ImageResult {
   id: string;
@@ -49,18 +50,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-background">
+      <div className="max-w-7xl mx-auto space-y-12">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">
             Semantic Image Search
           </h1>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Upload images and search through them using natural language
           </p>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-12">
           <div className="max-w-xl mx-auto">
             <ImageUpload onUploadSuccess={loadImages} />
           </div>
@@ -70,8 +71,8 @@ export default function Home() {
           </div>
 
           {loading ? (
-            <div className="text-center py-8">
-              <div className="text-gray-600">Searching...</div>
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <ImageGrid images={images} onDelete={handleDelete} />

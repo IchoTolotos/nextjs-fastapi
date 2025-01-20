@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Upload, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ImageUploadProps {
   onUploadSuccess: () => void;
@@ -42,27 +44,38 @@ export default function ImageUpload({ onUploadSuccess }: ImageUploadProps) {
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
     },
-    multiple: true
+    multiple: true,
+    disabled: uploading
   });
 
   return (
     <div
       {...getRootProps()}
-      className={`p-8 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors
-        ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-        ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={cn(
+        "flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg text-center transition-colors",
+        isDragActive ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/50",
+        uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+      )}
     >
       <input {...getInputProps()} />
-      <div className="space-y-2">
-        <div className="text-gray-600">
-          {isDragActive ? (
-            <p>Drop the images here...</p>
+      <div className="flex flex-col items-center gap-4">
+        <div className="p-4 rounded-full bg-primary/10">
+          {uploading ? (
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
           ) : (
-            <p>Drag & drop images here, or click to select files</p>
+            <Upload className="h-8 w-8 text-primary" />
           )}
         </div>
-        {uploading && <p className="text-blue-500">Uploading...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        <div className="space-y-2">
+          <div className="text-muted-foreground">
+            {isDragActive ? (
+              <p className="text-primary">Drop the images here...</p>
+            ) : (
+              <p>Drag & drop images here, or click to select files</p>
+            )}
+          </div>
+          {error && <p className="text-destructive text-sm">{error}</p>}
+        </div>
       </div>
     </div>
   );

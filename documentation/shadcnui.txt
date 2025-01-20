@@ -1,0 +1,1184 @@
+Vite
+Install and configure Vite.
+Create project
+
+Start by creating a new React project using vite:
+pnpm
+npm
+yarn
+bun
+pnpm create vite@latest
+Copy
+Add Tailwind and its configuration
+
+Install tailwindcss and its peer dependencies, then generate your tailwind.config.js and postcss.config.js files:
+pnpm
+npm
+yarn
+bun
+pnpm add -D tailwindcss postcss autoprefixer
+Copy
+pnpm
+npm
+yarn
+bun
+pnpm dlx tailwindcss init -p
+Copy
+Add this import header in your main css file, src/index.css in our case:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+/* ... */
+Copy
+Configure the tailwind template paths in tailwind.config.js:
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+Copy
+Edit tsconfig.json file
+
+The current version of Vite splits TypeScript configuration into three files, two of which need to be edited. Add the baseUrl and paths properties to the compilerOptions section of the tsconfig.json and tsconfig.app.json files:
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+Copy
+Edit tsconfig.app.json file
+
+Add the following code to the tsconfig.app.json file to resolve paths, for your IDE:
+{
+  "compilerOptions": {
+    // ...
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+    // ...
+  }
+}
+Copy
+Update vite.config.ts
+
+Add the following code to the vite.config.ts so your app can resolve paths without error:
+pnpm
+npm
+yarn
+bun
+pnpm add -D @types/node
+Copy
+import path from "path"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
+ 
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+Copy
+Run the CLI
+
+Run the shadcn-ui init command to setup your project:
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest init
+Copy
+Configure components.json
+
+You will be asked a few questions to configure components.json:
+Which style would you like to use? › New York
+Which color would you like to use as base color? › Zinc
+Do you want to use CSS variables for colors? › no / yes
+Copy
+That's it
+
+You can now start adding components to your project.
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add button
+Copy
+The command above will add the Button component to your project. You can then import it like this:
+import { Button } from "@/components/ui/button"
+ 
+export default function Home() {
+  return (
+    <div>
+      <Button>Click me</Button>
+    </div>
+  )
+}
+components.json
+Configuration for your project.
+The components.json file holds configuration for your project.
+We use it to understand how your project is set up and how to generate components customized for your project.
+Note: The components.json file is optional and only required if you're using the CLI to add components to your project. If you're using the copy and paste method, you don't need this file.
+You can create a components.json file in your project by running the following command:
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest init
+Copy
+See the CLI section for more information.
+$schema
+You can see the JSON Schema for components.json here.
+components.json
+{
+  "$schema": "https://ui.shadcn.com/schema.json"
+}
+Copy
+style
+The style for your components. This cannot be changed after initialization.
+components.json
+{
+  "style": "default" | "new-york"
+}
+Copy
+Preview
+Code
+
+Style:
+New York
+Copy
+Create project
+Deploy your new project in one-click.
+Name
+
+Framework
+
+Select
+
+Cancel
+Deploy
+tailwind
+Configuration to help the CLI understand how Tailwind CSS is set up in your project.
+See the installation section for how to set up Tailwind CSS.
+tailwind.config
+Path to where your tailwind.config.js file is located.
+components.json
+{
+  "tailwind": {
+    "config": "tailwind.config.js" | "tailwind.config.ts"
+  }
+}
+Copy
+tailwind.css
+Path to the CSS file that imports Tailwind CSS into your project.
+components.json
+{
+  "tailwind": {
+    "css": "styles/global.css"
+  }
+}
+Copy
+tailwind.baseColor
+This is used to generate the default color palette for your components. This cannot be changed after initialization.
+components.json
+{
+  "tailwind": {
+    "baseColor": "gray" | "neutral" | "slate" | "stone" | "zinc"
+  }
+}
+Copy
+tailwind.cssVariables
+You can choose between using CSS variables or Tailwind CSS utility classes for theming.
+To use utility classes for theming set tailwind.cssVariables to false. For CSS variables, set tailwind.cssVariables to true.
+components.json
+{
+  "tailwind": {
+    "cssVariables": `true` | `false`
+  }
+}
+Copy
+For more information, see the theming docs.
+This cannot be changed after initialization. To switch between CSS variables and utility classes, you'll have to delete and re-install your components.
+tailwind.prefix
+The prefix to use for your Tailwind CSS utility classes. Components will be added with this prefix.
+components.json
+{
+  "tailwind": {
+    "prefix": "tw-"
+  }
+}
+Copy
+rsc
+Whether or not to enable support for React Server Components.
+The CLI automatically adds a use client directive to client components when set to true.
+components.json
+{
+  "rsc": `true` | `false`
+}
+Copy
+tsx
+Choose between TypeScript or JavaScript components.
+Setting this option to false allows components to be added as JavaScript with the .jsx file extension.
+components.json
+{
+  "tsx": `true` | `false`
+}
+Copy
+aliases
+The CLI uses these values and the paths config from your tsconfig.json or jsconfig.json file to place generated components in the correct location.
+Path aliases have to be set up in your tsconfig.json or jsconfig.json file.
+Important: If you're using the src directory, make sure it is included under paths in your tsconfig.json or jsconfig.json file.
+aliases.utils
+Import alias for your utility functions.
+components.json
+{
+  "aliases": {
+    "utils": "@/lib/utils"
+  }
+}
+Copy
+aliases.components
+Import alias for your components.
+components.json
+{
+  "aliases": {
+    "components": "@/components"
+  }
+}
+Copy
+aliases.ui
+Import alias for ui components.
+The CLI will use the aliases.ui value to determine where to place your ui components. Use this config if you want to customize the installation directory for your ui components.
+components.json
+{
+  "aliases": {
+    "ui": "@/app/ui"
+  }
+}
+Copy
+aliases.lib
+Import alias for lib functions such as format-date or generate-id.
+components.json
+{
+  "aliases": {
+    "lib": "@/lib"
+  }
+}
+Copy
+aliases.hooks
+Import alias for hooks such as use-media-query or use-toast.
+components.json
+{
+  "aliases": {
+    "hooks": "@/hooks"
+  }
+}Theming
+Using CSS Variables or Tailwind CSS for theming.
+You can choose between using CSS variables or Tailwind CSS utility classes for theming.
+Utility classes
+<div className="bg-zinc-950 dark:bg-white" />
+Copy
+To use utility classes for theming set tailwind.cssVariables to false in your components.json file.
+components.json
+{
+  "style": "default",
+  "rsc": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "app/globals.css",
+    "baseColor": "slate",
+    "cssVariables": false
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+Copy
+CSS Variables
+<div className="bg-background text-foreground" />
+Copy
+To use CSS variables for theming set tailwind.cssVariables to true in your components.json file.
+components.json
+{
+  "style": "default",
+  "rsc": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "app/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  }
+}
+Copy
+Convention
+We use a simple background and foreground convention for colors. The background variable is used for the background color of the component and the foreground variable is used for the text color.
+The background suffix is omitted when the variable is used for the background color of the component.
+Given the following CSS variables:
+--primary: 222.2 47.4% 11.2%;
+--primary-foreground: 210 40% 98%;
+Copy
+The background color of the following component will be hsl(var(--primary)) and the foreground color will be hsl(var(--primary-foreground)).
+<div className="bg-primary text-primary-foreground">Hello</div>
+Copy
+CSS variables must be defined without color space function. See the Tailwind CSS documentation for more information.
+List of variables
+Here's the list of variables available for customization:
+Default background color of <body />...etc
+--background: 0 0% 100%;
+--foreground: 222.2 47.4% 11.2%;
+Copy
+Muted backgrounds such as <TabsList />, <Skeleton /> and <Switch />
+--muted: 210 40% 96.1%;
+--muted-foreground: 215.4 16.3% 46.9%;
+Copy
+Background color for <Card />
+--card: 0 0% 100%;
+--card-foreground: 222.2 47.4% 11.2%;
+Copy
+Background color for popovers such as <DropdownMenu />, <HoverCard />, <Popover />
+--popover: 0 0% 100%;
+--popover-foreground: 222.2 47.4% 11.2%;
+Copy
+Default border color
+--border: 214.3 31.8% 91.4%;
+Copy
+Border color for inputs such as <Input />, <Select />, <Textarea />
+--input: 214.3 31.8% 91.4%;
+Copy
+Primary colors for <Button />
+--primary: 222.2 47.4% 11.2%;
+--primary-foreground: 210 40% 98%;
+Copy
+Secondary colors for <Button />
+--secondary: 210 40% 96.1%;
+--secondary-foreground: 222.2 47.4% 11.2%;
+Copy
+Used for accents such as hover effects on <DropdownMenuItem>, <SelectItem>...etc
+--accent: 210 40% 96.1%;
+--accent-foreground: 222.2 47.4% 11.2%;
+Copy
+Used for destructive actions such as <Button variant="destructive">
+--destructive: 0 100% 50%;
+--destructive-foreground: 210 40% 98%;
+Copy
+Used for focus ring
+--ring: 215 20.2% 65.1%;
+Copy
+Border radius for card, input and buttons
+--radius: 0.5rem;
+Copy
+Adding new colors
+To add new colors, you need to add them to your CSS file and to your tailwind.config.js file.
+app/globals.css
+:root {
+  --warning: 38 92% 50%;
+  --warning-foreground: 48 96% 89%;
+}
+ 
+.dark {
+  --warning: 48 96% 89%;
+  --warning-foreground: 38 92% 50%;
+}
+Copy
+tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        warning: "hsl(var(--warning))",
+        "warning-foreground": "hsl(var(--warning-foreground))",
+      },
+    },
+  },
+}
+Copy
+You can now use the warning utility class in your components.
+<div className="bg-warning text-warning-foreground" />
+Copy
+Other color formats
+I recommend using HSL colors for theming but you can also use other color formats if you prefer.
+See the Tailwind CSS documentation for more information on using rgb, rgba or hsl colors.
+
+Typography
+Styles for headings, paragraphs, lists...etc
+Preview
+Code
+export function TypographyDemo() {
+  return (
+    <div>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        The Joke Tax Chronicles
+      </h1>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        Once upon a time, in a far-off land, there was a very lazy king who
+        spent all day lounging on his throne. One day, his advisors came to him
+        with a problem: the kingdom was running out of money.
+      </p>
+      <h2 className="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+        The King's Plan
+      </h2>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        The king thought long and hard, and finally came up with{" "}
+        <a
+          href="#"
+          className="font-medium text-primary underline underline-offset-4"
+        >
+          a brilliant plan
+        </a>
+        : he would tax the jokes in the kingdom.
+      </p>
+      <blockquote className="mt-6 border-l-2 pl-6 italic">
+        "After all," he said, "everyone enjoys a good joke, so it's only fair
+        that they should pay for the privilege."
+      </blockquote>
+      <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight">
+        The Joke Tax
+      </h3>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        The king's subjects were not amused. They grumbled and complained, but
+        the king was firm:
+      </p>
+      <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
+        <li>1st level of puns: 5 gold coins</li>
+        <li>2nd level of jokes: 10 gold coins</li>
+        <li>3rd level of one-liners : 20 gold coins</li>
+      </ul>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        As a result, people stopped telling jokes, and the kingdom fell into a
+        gloom. But there was one person who refused to let the king's
+        foolishness get him down: a court jester named Jokester.
+      </p>
+      <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight">
+        Jokester's Revolt
+      </h3>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        Jokester began sneaking into the castle in the middle of the night and
+        leaving jokes all over the place: under the king's pillow, in his soup,
+        even in the royal toilet. The king was furious, but he couldn't seem to
+        stop Jokester.
+      </p>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        And then, one day, the people of the kingdom discovered that the jokes
+        left by Jokester were so funny that they couldn't help but laugh. And
+        once they started laughing, they couldn't stop.
+      </p>
+      <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight">
+        The People's Rebellion
+      </h3>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        The people of the kingdom, feeling uplifted by the laughter, started to
+        tell jokes and puns again, and soon the entire kingdom was in on the
+        joke.
+      </p>
+      <div className="my-6 w-full overflow-y-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="m-0 border-t p-0 even:bg-muted">
+              <th className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right">
+                King's Treasury
+              </th>
+              <th className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right">
+                People's happiness
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="m-0 border-t p-0 even:bg-muted">
+              <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+                Empty
+              </td>
+              <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+                Overflowing
+              </td>
+            </tr>
+            <tr className="m-0 border-t p-0 even:bg-muted">
+              <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+                Modest
+              </td>
+              <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+                Satisfied
+              </td>
+            </tr>
+            <tr className="m-0 border-t p-0 even:bg-muted">
+              <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+                Full
+              </td>
+              <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+                Ecstatic
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        The king, seeing how much happier his subjects were, realized the error
+        of his ways and repealed the joke tax. Jokester was declared a hero, and
+        the kingdom lived happily ever after.
+      </p>
+      <p className="leading-7 [&:not(:first-child)]:mt-6">
+        The moral of the story is: never underestimate the power of a good laugh
+        and always be careful of bad ideas.
+      </p>
+    </div>
+  )
+}
+Copy
+h1
+Preview
+Code
+export function TypographyH1() {
+  return (
+    <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+      Taxing Laughter: The Joke Tax Chronicles
+    </h1>
+  )
+}
+Copy
+h2
+Preview
+Code
+export function TypographyH2() {
+  return (
+    <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+      The People of the Kingdom
+    </h2>
+  )
+}
+Copy
+h3
+Preview
+Code
+export function TypographyH3() {
+  return (
+    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+      The Joke Tax
+    </h3>
+  )
+}
+Copy
+h4
+Preview
+Code
+export function TypographyH4() {
+  return (
+    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+      People stopped telling jokes
+    </h4>
+  )
+}
+Copy
+p
+Preview
+Code
+export function TypographyP() {
+  return (
+    <p className="leading-7 [&:not(:first-child)]:mt-6">
+      The king, seeing how much happier his subjects were, realized the error of
+      his ways and repealed the joke tax.
+    </p>
+  )
+}
+Copy
+blockquote
+Preview
+Code
+export function TypographyBlockquote() {
+  return (
+    <blockquote className="mt-6 border-l-2 pl-6 italic">
+      "After all," he said, "everyone enjoys a good joke, so it's only fair that
+      they should pay for the privilege."
+    </blockquote>
+  )
+}
+Copy
+table
+Preview
+Code
+export function TypographyTable() {
+  return (
+    <div className="my-6 w-full overflow-y-auto">
+      <table className="w-full">
+        <thead>
+          <tr className="m-0 border-t p-0 even:bg-muted">
+            <th className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right">
+              King's Treasury
+            </th>
+            <th className="border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right">
+              People's happiness
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="m-0 border-t p-0 even:bg-muted">
+            <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              Empty
+            </td>
+            <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              Overflowing
+            </td>
+          </tr>
+          <tr className="m-0 border-t p-0 even:bg-muted">
+            <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              Modest
+            </td>
+            <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              Satisfied
+            </td>
+          </tr>
+          <tr className="m-0 border-t p-0 even:bg-muted">
+            <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              Full
+            </td>
+            <td className="border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right">
+              Ecstatic
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  )
+}
+Copy
+list
+Preview
+Code
+export function TypographyList() {
+  return (
+    <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
+      <li>1st level of puns: 5 gold coins</li>
+      <li>2nd level of jokes: 10 gold coins</li>
+      <li>3rd level of one-liners : 20 gold coins</li>
+    </ul>
+  )
+}
+Copy
+Inline code
+Preview
+Code
+export function TypographyInlineCode() {
+  return (
+    <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+      @radix-ui/react-alert-dialog
+    </code>
+  )
+}
+Copy
+Lead
+Preview
+Code
+export function TypographyLead() {
+  return (
+    <p className="text-xl text-muted-foreground">
+      A modal dialog that interrupts the user with important content and expects
+      a response.
+    </p>
+  )
+}
+Copy
+Large
+Preview
+Code
+export function TypographyLarge() {
+  return <div className="text-lg font-semibold">Are you absolutely sure?</div>
+}
+Copy
+Small
+Preview
+Code
+export function TypographySmall() {
+  return (
+    <small className="text-sm font-medium leading-none">Email address</small>
+  )
+}
+Copy
+Muted
+Preview
+Code
+export function TypographyMuted() {
+  return (
+    <p className="text-sm text-muted-foreground">Enter your email address.</p>
+  )
+}
+
+
+
+## Components
+
+Accordion
+A vertically stacked set of interactive headings that each reveal a section of content.
+Docs
+API Reference
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Is it accessible?
+Is it styled?
+Is it animated?
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add accordion
+Copy
+Usage
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+Copy
+<Accordion type="single" collapsible>
+  <AccordionItem value="item-1">
+    <AccordionTrigger>Is it accessible?</AccordionTrigger>
+    <AccordionContent>
+      Yes. It adheres to the WAI-ARIA design pattern.
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+Alert
+Displays a callout for user attention.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Heads up!
+You can add components to your app using the cli.
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add alert
+Copy
+Usage
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+Copy
+<Alert>
+  <Terminal className="h-4 w-4" />
+  <AlertTitle>Heads up!</AlertTitle>
+  <AlertDescription>
+    You can add components and dependencies to your app using the cli.
+  </AlertDescription>
+</Alert>
+Copy
+Examples
+Default
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Heads up!
+You can add components to your app using the cli.
+Destructive
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Error
+Your session has expired. Please log in again.Alert Dialog
+A modal dialog that interrupts the user with important content and expects a response.
+Docs
+API Reference
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Show Dialog
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add alert-dialog
+Copy
+Usage
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+Copy
+<AlertDialog>
+  <AlertDialogTrigger>Open</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction>Continue</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>Aspect Ratio
+Displays content within a desired ratio.
+Docs
+API Reference
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Photo by Drew Beamer
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add aspect-ratio
+Copy
+Usage
+import Image from "next/image"
+ 
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+Copy
+<div className="w-[450px]">
+  <AspectRatio ratio={16 / 9}>
+    <Image src="..." alt="Image" className="rounded-md object-cover" />
+  </AspectRatio>
+</div>Avatar
+An image element with a fallback for representing the user.
+Docs
+API Reference
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+@shadcn
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add avatar
+Copy
+Usage
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+Copy
+<Avatar>
+  <AvatarImage src="https://github.com/shadcn.png" />
+  <AvatarFallback>CN</AvatarFallback>
+</Avatar>
+Copy
+Badge
+Displays a badge or a component that looks like a badge.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Badge
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add badge
+Copy
+Usage
+import { Badge } from "@/components/ui/badge"
+Copy
+<Badge variant="outline">Badge</Badge>
+Copy
+Link
+You can use the badgeVariants helper to create a link that looks like a badge.
+import { badgeVariants } from "@/components/ui/badge"
+Copy
+<Link className={badgeVariants({ variant: "outline" })}>Badge</Link>
+Copy
+Examples
+Default
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Badge
+Secondary
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Secondary
+Outline
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Outline
+Destructive
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Destructive
+Avatar
+Breadcrumb
+Displays the path to the current resource using a hierarchy of links.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Home
+
+More
+Toggle menu
+Components
+Breadcrumb
+Installation
+CLI
+Manual
+pnpm
+npm
+yarn
+bun
+pnpm dlx shadcn@latest add breadcrumb
+Copy
+Usage
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+Copy
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/">Home</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/components">Components</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+Copy
+Examples
+Custom separator
+Use a custom component as children for <BreadcrumbSeparator /> to create a custom separator.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Home
+Components
+Breadcrumb
+import { Slash } from "lucide-react"
+ 
+...
+ 
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/">Home</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator>
+      <Slash />
+    </BreadcrumbSeparator>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/components">Components</BreadcrumbLink>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+Copy
+Dropdown
+You can compose <BreadcrumbItem /> with a <DropdownMenu /> to create a dropdown in the breadcrumb.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Home
+Components
+Breadcrumb
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+ 
+...
+ 
+<BreadcrumbItem>
+  <DropdownMenu>
+    <DropdownMenuTrigger className="flex items-center gap-1">
+      Components
+      <ChevronDownIcon />
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="start">
+      <DropdownMenuItem>Documentation</DropdownMenuItem>
+      <DropdownMenuItem>Themes</DropdownMenuItem>
+      <DropdownMenuItem>GitHub</DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</BreadcrumbItem>
+Copy
+Collapsed
+We provide a <BreadcrumbEllipsis /> component to show a collapsed state when the breadcrumb is too long.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Home
+More
+Components
+Breadcrumb
+import { BreadcrumbEllipsis } from "@/components/ui/breadcrumb"
+ 
+...
+ 
+<Breadcrumb>
+  <BreadcrumbList>
+    {/* ... */}
+    <BreadcrumbItem>
+      <BreadcrumbEllipsis />
+    </BreadcrumbItem>
+    {/* ... */}
+  </BreadcrumbList>
+</Breadcrumb>
+Copy
+Link component
+To use a custom link component from your routing library, you can use the asChild prop on <BreadcrumbLink />.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Home
+Components
+Breadcrumb
+import { Link } from "next/link"
+ 
+...
+ 
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink asChild>
+        <Link href="/">Home</Link>
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+    {/* ... */}
+  </BreadcrumbList>
+</Breadcrumb>
+Copy
+Responsive
+Here's an example of a responsive breadcrumb that composes <BreadcrumbItem /> with <BreadcrumbEllipsis />, <DropdownMenu />, and <Drawer />.
+It displays a dropdown on desktop and a drawer on mobile.
+Preview
+Code
+
+Style:
+New York
+Open in
+Copy
+Home
+
+More
+Data Fetching
+Caching and Revalidating

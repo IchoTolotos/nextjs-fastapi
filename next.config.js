@@ -7,16 +7,16 @@ const nextConfig = {
         destination:
           process.env.NODE_ENV === "development"
             ? "http://127.0.0.1:8000/api/:path*"
-            : "/api/",
+            : "http://localhost:8000/api/:path*",
       },
     ];
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
+        protocol: process.env.NODE_ENV === "development" ? 'http' : 'https',
+        hostname: process.env.NODE_ENV === "development" ? 'localhost' : process.env.NEXT_PUBLIC_HOST || 'your-domain.com',
+        port: process.env.NODE_ENV === "development" ? '8000' : '',
         pathname: '/uploads/**',
       },
     ],

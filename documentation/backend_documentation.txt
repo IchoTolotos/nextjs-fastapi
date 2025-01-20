@@ -1,0 +1,185 @@
+# ActionVerbs Backend Documentation
+
+## Server Infrastructure
+
+### Hetzner Cloud Server
+- Instance Type: CX11
+- Location: Germany (EU)
+- IP Address: 162.55.48.17
+- Domain: actionverbs.pablothiermann.com
+- OS: Ubuntu 24.04.1 LTS
+
+### Directory Structure
+```
+/var/www/actionverbs-api/
+├── server/
+│   ├── node_modules/
+│   ├── utils/
+│   │   ├── db.js
+│   │   └── logger.js
+│   ├── server.js
+│   ├── package.json
+│   └── .env
+```
+
+## Backend Architecture
+
+### Node.js Application
+- Runtime: Node.js
+- Framework: Express.js
+- Port: 3001
+- Process Manager: PM2
+
+### Key Components
+1. OpenAI Integration
+   - Uses OpenAI API for scene analysis
+   - Assistants API for processing text
+   - Two language models (EN/DE)
+
+2. Database Integration
+   - Neon PostgreSQL Database
+   - Stores interaction logs and analysis results
+
+3. API Endpoints
+   - POST /api/analyze: Main endpoint for scene analysis
+   - GET /api/logs: Retrieves analysis history
+   - GET /health: Server health check
+
+### Security & CORS
+- CORS enabled for specific origins:
+  - localhost:3000 (development)
+  - action-verbs-director.onrender.com (production frontend)
+  - actionverbs.pablothiermann.com (API domain)
+
+### SSL/HTTPS
+- SSL certificate via Let's Encrypt/Certbot
+- Managed through Nginx
+- Auto-renewal configured
+
+## Nginx Configuration
+Location: /etc/nginx/sites-available/actionverbs-api
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name actionverbs.pablothiermann.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name actionverbs.pablothiermann.com;
+
+    ssl_certificate /etc/letsencrypt/live/actionverbs.pablothiermann.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/actionverbs.pablothiermann.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## Environment Configuration
+Required environment variables in `/var/www/actionverbs-api/server/.env`:
+```
+NODE_ENV=production
+PORT=3001
+OPENAI_API_KEY=<your-openai-key>
+DATABASE_URL=<your-neon-db-url>
+```
+
+## Deployment & Maintenance
+
+### Deploying Updates
+```bash
+# SSH into server
+ssh -i ~/.ssh/hetzner_key root@162.55.48.17
+
+# Update application
+cd /var/www/actionverbs-api
+git pull
+cd server
+npm install
+pm2 restart actionverbs-api
+```
+
+### Monitoring
+```bash
+# Check application status
+pm2 status
+pm2 logs actionverbs-api
+
+# Check Nginx logs
+tail -f /var/log/nginx/access.log
+tail -f /var/log/nginx/error.log
+```
+
+### SSL Certificate Renewal
+Certbot auto-renewal is configured. Manual renewal if needed:
+```bash
+certbot renew
+```
+
+### Database Backup
+Neon database provides automatic backups. Manual backup can be performed through Neon console.
+
+## Security Measures
+1. Firewall (UFW) configured to allow only:
+   - SSH (22)
+   - HTTP (80)
+   - HTTPS (443)
+
+2. Regular security updates:
+```bash
+apt update
+apt upgrade
+```
+
+3. SSL/HTTPS enforced for all connections
+4. Environment variables for sensitive data
+5. CORS restrictions for allowed origins
+
+## Error Handling
+- Comprehensive error logging
+- JSON parsing validation
+- Request size limits
+- Automatic error reporting to database
+
+## Monitoring & Logging
+1. Application Logs:
+   - PM2 logs
+   - Custom logging in database
+   - Request/response logging
+
+2. System Monitoring:
+   - PM2 monitoring
+   - Nginx access/error logs
+   - System resource monitoring
+
+## Backup & Recovery
+1. Code: GitHub repository
+2. Database: Neon automatic backups
+3. Environment: Documented in .env.example
+4. SSL Certificates: Let's Encrypt backup
+
+## Frontend Integration
+Frontend (hosted on Render.com) connects via:
+```javascript
+const API_URL = 'https://actionverbs.pablothiermann.com';
+```
+
+## Support & Troubleshooting
+Common issues and solutions:
+1. CORS errors: Check allowed origins
+2. SSL issues: Verify certificate renewal
+3. Database connection: Check Neon status
+4. API timeouts: Monitor PM2 logs 
